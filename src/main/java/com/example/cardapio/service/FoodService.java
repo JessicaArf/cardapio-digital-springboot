@@ -34,6 +34,15 @@ public class FoodService {
         return getFoodDto(food);
     }
 
+    public FoodDTO updateFood(Long id, FoodDTO data){
+        Food food = foodRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Food not found."));
+        food.setTitle(data.title());
+        food.setPrice(data.price());
+        food.setImage(data.image());
+        foodRepository.save(food);
+        return getFoodDto(food);
+    }
+
     public void deleteFood(Long id){
         Food food = foodRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Food not found."));
         foodRepository.delete(food);

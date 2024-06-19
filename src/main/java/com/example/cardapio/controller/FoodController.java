@@ -29,15 +29,20 @@ public class FoodController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FoodDTO> getFoodById(@RequestParam Long id){
+    public ResponseEntity<FoodDTO> getFoodById(@PathVariable Long id){
         FoodDTO food = foodService.getFoodById(id);
         return ResponseEntity.status(HttpStatus.OK).body(food);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<FoodDTO> updateFood(@PathVariable Long id, @RequestBody FoodDTO data){
+        FoodDTO food = foodService.updateFood(id, data);
+        return ResponseEntity.status(HttpStatus.OK).body(food);
+    }
 
 
-    @DeleteMapping
-    public ResponseEntity<String> deleteFood(@RequestParam Long id){
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteFood(@PathVariable Long id){
         foodService.deleteFood(id);
         return ResponseEntity.status(HttpStatus.OK).body("Food deleted successfully.");
     }
