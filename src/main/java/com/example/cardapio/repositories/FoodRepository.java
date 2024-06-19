@@ -1,5 +1,6 @@
-package com.example.cardapio.food;
+package com.example.cardapio.repositories;
 
+import com.example.cardapio.model.Food;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FoodRepository extends JpaRepository<Food, Long> {

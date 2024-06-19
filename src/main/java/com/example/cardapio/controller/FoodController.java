@@ -1,33 +1,31 @@
 package com.example.cardapio.controller;
 
-import com.example.cardapio.food.Food;
-import com.example.cardapio.food.FoodRepository;
-import com.example.cardapio.food.FoodRequestDTO;
-import com.example.cardapio.food.FoodResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.cardapio.dtos.FoodDTO;
+import com.example.cardapio.service.FoodService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("food")
+@RequiredArgsConstructor
 public class FoodController {
 
-    @Autowired
-    private FoodRepository repository;
+    private final FoodService foodService;
 
     @PostMapping
-    public void saveFood(@RequestBody FoodRequestDTO data){
-        Food foodData = new Food(data);
-        repository.save(foodData);
-        return;
+    public ResponseEntity<FoodDTO> saveFood(@RequestBody FoodDTO data){
+        FoodDTO food = foodService.saveFood(data);
+        return ResponseEntity.status(HttpStatus.CREATED).body(food);
     }
 
     @GetMapping
-    public List<FoodResponseDTO> getAll(){
-
-        List<FoodResponseDTO> foodList = repository.findAll().stream().map(FoodResponseDTO::new).toList();
-        return foodList;
-
+    public ResponseEntity<List<FoodDTO>> getAll(){
+        List<FoodDTO> foodList = foodService.getAllFood();
+        return ResponseEntity.status(HttpStatus.OK).body(foodList);
     }
+
 }
