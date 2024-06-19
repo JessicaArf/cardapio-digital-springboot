@@ -1,13 +1,12 @@
 package com.example.cardapio.service;
 
 import com.example.cardapio.dtos.FoodDTO;
+import com.example.cardapio.exceptions.FoodNotFoundException;
 import com.example.cardapio.mapper.FoodMapper;
 import com.example.cardapio.model.Food;
 import com.example.cardapio.repositories.FoodRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -30,12 +29,12 @@ public class FoodService {
     }
 
     public FoodDTO getFoodById(Long id){
-        Food food = foodRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Food not found."));
+        Food food = foodRepository.findById(id).orElseThrow(() -> new FoodNotFoundException(id));
         return getFoodDto(food);
     }
 
     public FoodDTO updateFood(Long id, FoodDTO data){
-        Food food = foodRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Food not found."));
+        Food food = foodRepository.findById(id).orElseThrow(() -> new FoodNotFoundException(id));
         food.setTitle(data.title());
         food.setPrice(data.price());
         food.setImage(data.image());
@@ -44,7 +43,7 @@ public class FoodService {
     }
 
     public void deleteFood(Long id){
-        Food food = foodRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Food not found."));
+        Food food = foodRepository.findById(id).orElseThrow(() -> new FoodNotFoundException(id));
         foodRepository.delete(food);
     }
 
