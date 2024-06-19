@@ -28,4 +28,18 @@ public class FoodController {
         return ResponseEntity.status(HttpStatus.OK).body(foodList);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<FoodDTO> getFoodById(@RequestParam Long id){
+        FoodDTO food = foodService.getFoodById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(food);
+    }
+
+
+
+    @DeleteMapping
+    public ResponseEntity<String> deleteFood(@RequestParam Long id){
+        foodService.deleteFood(id);
+        return ResponseEntity.status(HttpStatus.OK).body("Food deleted successfully.");
+    }
+
 }
