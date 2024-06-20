@@ -12,4 +12,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleFoodNotFoundException(FoodNotFoundException e){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
+
+    @ExceptionHandler(TitleAlreadyExistsException.class)
+    public ResponseEntity<Object> handleTitleAlreadyExistsException(TitleAlreadyExistsException e){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
 }
