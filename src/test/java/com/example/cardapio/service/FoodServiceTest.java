@@ -79,4 +79,33 @@ class FoodServiceTest {
             });
         }
     }
+
+    @Nested
+    class getFoodById {
+
+        @Test
+        @DisplayName("Retornar um usuário por id com sucesso.")
+        void shouldGetFoodById() {
+            // Arrange
+            Long foodId = 1L;
+            Food existingFood = new Food(foodId, "Macarrão", "http://example.com/image.jpg", 30);
+            FoodDTO expectedFoodDTO = new FoodDTO(foodId, "Macarrão", "http://example.com/image.jpg", 30);
+
+            // Configura o comportamento do repositório para retornar um Optional com o Food
+            when(foodRepository.findById(foodId)).thenReturn(Optional.of(existingFood));
+            // Configura o comportamento do mapeador para converter o Food em FoodDTO
+            when(foodMapper.toDTO(existingFood)).thenReturn(expectedFoodDTO);
+
+            // Act
+            FoodDTO actualFoodDTO = foodService.getFoodById(foodId);
+
+            // Assert
+            assertNotNull(actualFoodDTO);
+            assertEquals(expectedFoodDTO.id(), actualFoodDTO.id());
+            assertEquals(expectedFoodDTO.title(), actualFoodDTO.title());
+            assertEquals(expectedFoodDTO.image(), actualFoodDTO.image());
+            assertEquals(expectedFoodDTO.price(), actualFoodDTO.price());
+        }
+
+    }
 }
