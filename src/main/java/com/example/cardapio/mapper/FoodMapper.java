@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface FoodMapper {
     FoodDTO toDTO(Food food);
-    @Mapping(target = "id", ignore = true) // Ignora o mapeamento do ID
+    @Mapping(target = "id", source = "id")
     Food toEntity(FoodDTO foodDto);
     List<FoodDTO> toDTOList(List<Food> foodList);
 }

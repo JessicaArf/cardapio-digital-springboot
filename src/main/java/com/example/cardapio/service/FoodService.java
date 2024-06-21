@@ -54,11 +54,11 @@ public class FoodService {
         foodRepository.delete(food);
     }
 
-    public FoodDTO getFoodDto(Food food) {
+    private FoodDTO getFoodDto(Food food) {
         return foodMapper.toDTO(food);
     }
 
-    public Food getFood(FoodDTO data) {
+    private Food getFood(FoodDTO data) {
         return foodMapper.toEntity(data);
     }
 
