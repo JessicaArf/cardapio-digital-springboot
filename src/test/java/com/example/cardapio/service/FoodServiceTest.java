@@ -108,4 +108,23 @@ class FoodServiceTest {
         }
 
     }
+
+    @Nested
+    class deleteFood {
+        @Test
+        @DisplayName("Deve deletar um alimento pelo ID")
+        void shouldDeleteFoodById() {
+            // Arrange
+            Long foodId = 1L;
+            Food existingFood = new Food(foodId, "Macarrão", "http://example.com/image.jpg", 30);
+            doReturn(Optional.of(existingFood)).when(foodRepository).findById(foodId);
+
+            // Act
+            foodService.deleteFood(foodId);
+
+            // Assert
+            verify(foodRepository, times(1)).delete(existingFood);
+        }
+    }
+
 }
