@@ -90,7 +90,7 @@ class FoodServiceTest {
     class getAllFood {
 
         @Test
-        @DisplayName("Dev retornar a lista de foods com sucesso.")
+        @DisplayName("Deve retornar a lista de alimentos com sucesso.")
         void shouldReturnAllFoodsWithSuccess() {
             var food = new Food(1L, "Macarrão", "http://example.com/image.jpg", 30);
             var foodDTO = new FoodDTO(1L, "Macarrão", "http://example.com/image.jpg", 30);
@@ -99,7 +99,7 @@ class FoodServiceTest {
             var foodDTOList = List.of(foodDTO);
 
             doReturn(foodList).when(foodRepository).findAll();
-            doReturn(foodDTO).when(foodMapper).toDTO(food);
+            doReturn(foodDTO).when(foodMapper).toDTO(foodArgumentCaptor.capture());
 
             // Act
             var output = foodService.getAllFoods();
@@ -123,6 +123,7 @@ class FoodServiceTest {
         @Test
         @DisplayName("Retornar um usuário por id com sucesso.")
         void shouldGetFoodByIdWithSuccess() {
+
             // Arrange
             Long foodId = 1L;
             Food existingFood = new Food(foodId, "Macarrão", "http://example.com/image.jpg", 30);
@@ -142,6 +143,7 @@ class FoodServiceTest {
             assertEquals(expectedFoodDTO.title(), actualFoodDTO.title());
             assertEquals(expectedFoodDTO.image(), actualFoodDTO.image());
             assertEquals(expectedFoodDTO.price(), actualFoodDTO.price());
+
         }
 
         @Test
@@ -199,4 +201,45 @@ class FoodServiceTest {
         }
     }
 
+    @Nested
+    class updateFood {
+
+        @Test
+        @DisplayName("Atualizar o alimento com sucesso.")
+        void shouldUpdateFoodWithSuccess() {
+            // Arrange
+            Long foodId = 1L;
+            var updateFoodDTO = new FoodDTO(foodId, "Novo Macarrão", "http://example.com/newimage.jpg", 35);
+            var existingFood = new Food(foodId, "Macarrão", "http://example.com/image.jpg", 30);
+
+            doReturn(Optional.of(existingFood)).when(foodRepository).findById(foodId);
+            doReturn(existingFood).when(foodRepository).save(foodArgumentCaptor.capture());
+            doReturn(updateFoodDTO).when(foodMapper).toDTO(foodArgumentCaptor.capture());
+
+            // Act
+            foodService.updateFood(foodId, updateFoodDTO);
+
+            // Assert
+            verify(foodRepository).findById(foodId);
+            verify(foodRepository).save(foodArgumentCaptor.capture());
+
+            var foodCaptured = foodArgumentCaptor.getValue();
+
+            assertEquals(updateFoodDTO.id(), foodCaptured.getId());
+            assertEquals(updateFoodDTO.title(), foodCaptured.getTitle());
+            assertEquals(updateFoodDTO.price(), foodCaptured.getPrice());
+            assertEquals(updateFoodDTO.image(), foodCaptured.getImage());
+        }
+
+        @Test
+        @DisplayName("Deve lançar FoodNotFoundException quando não encontrar o ID")
+        void shouldThrowFoodNotFoundException() {
+            Long nonExistentId = 1L;
+            FoodDTO updateData = new FoodDTO(nonExistentId, "Macarrão à Bolonhesa", "http://example.com/image.jpg", 35);
+
+            when(foodRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+            assertThrows(FoodNotFoundException.class, () -> foodService.updateFood(nonExistentId, updateData));
+        }
+    }
 }
