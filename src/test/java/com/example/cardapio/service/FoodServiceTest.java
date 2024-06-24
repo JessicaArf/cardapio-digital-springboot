@@ -1,6 +1,7 @@
 package com.example.cardapio.service;
 
 import com.example.cardapio.dtos.FoodDTO;
+import com.example.cardapio.exceptions.FoodNotFoundException;
 import com.example.cardapio.exceptions.TitleAlreadyExistsException;
 import com.example.cardapio.mapper.FoodMapper;
 import com.example.cardapio.model.Food;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,8 +20,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +34,11 @@ class FoodServiceTest {
     @InjectMocks
     private FoodService foodService;
 
+    @Captor
+    private ArgumentCaptor<Food> foodArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<FoodDTO> foodDtoArgumentCaptor;
+
     @Nested
     class saveFood {
 
@@ -45,8 +51,8 @@ class FoodServiceTest {
             var foodDTO = new FoodDTO(1L, "Macarrão", "http://example.com/image.jpg", 30);
             var food = new Food(1L, "Macarrão", "http://example.com/image.jpg", 30);
 
-            doReturn(food).when(foodMapper).toEntity(any(FoodDTO.class));
-            doReturn(food).when(foodRepository).save(any(Food.class));
+            doReturn(food).when(foodMapper).toEntity(foodDtoArgumentCaptor.capture());
+            doReturn(food).when(foodRepository).save(foodArgumentCaptor.capture());
             doReturn(new FoodDTO(1L, "Macarrão", "http://example.com/image.jpg", 30)).when(foodMapper).toDTO(any(Food.class));
 
             // Act
@@ -65,13 +71,13 @@ class FoodServiceTest {
 
 
         @Test
-        @DisplayName("Deve lançar TitleAlreadyExistsException quando o título já existir")
+        @DisplayName("Deve lançar TitleAlreadyExistsException quando o título já existir.")
         void shouldThrowTitleAlreadyExistsException() {
             // Arrange
             var existingFood = new Food(1L, "Macarrão", "http://example.com/image.jpg", 30);
             var foodDTO = new FoodDTO(1L, "Macarrão", "http://example.com/image.jpg", 30);
 
-            doReturn(Optional.of(existingFood)).when(foodRepository).findByTitle(anyString());
+            doReturn(Optional.of(existingFood)).when(foodRepository).findByTitle("Macarrão");
 
             // Act & Assert
             assertThrows(TitleAlreadyExistsException.class, () -> {
@@ -81,11 +87,42 @@ class FoodServiceTest {
     }
 
     @Nested
+    class getAllFood {
+
+        @Test
+        @DisplayName("Dev retornar a lista de foods com sucesso.")
+        void shouldReturnAllFoodsWithSuccess() {
+            var food = new Food(1L, "Macarrão", "http://example.com/image.jpg", 30);
+            var foodDTO = new FoodDTO(1L, "Macarrão", "http://example.com/image.jpg", 30);
+
+            var foodList = List.of(food);
+            var foodDTOList = List.of(foodDTO);
+
+            doReturn(foodList).when(foodRepository).findAll();
+            doReturn(foodDTO).when(foodMapper).toDTO(food);
+
+            // Act
+            var output = foodService.getAllFoods();
+
+            // Assert
+            assertNotNull(output);
+            assertEquals(foodDTOList.size(), output.size());
+
+            // Verifica se os elementos da lista são iguais
+            assertEquals(foodDTOList.get(0).id(), output.get(0).id());
+            assertEquals(foodDTOList.get(0).title(), output.get(0).title());
+            assertEquals(foodDTOList.get(0).image(), output.get(0).image());
+            assertEquals(foodDTOList.get(0).price(), output.get(0).price());
+        }
+
+    }
+
+    @Nested
     class getFoodById {
 
         @Test
         @DisplayName("Retornar um usuário por id com sucesso.")
-        void shouldGetFoodById() {
+        void shouldGetFoodByIdWithSuccess() {
             // Arrange
             Long foodId = 1L;
             Food existingFood = new Food(foodId, "Macarrão", "http://example.com/image.jpg", 30);
@@ -107,13 +144,30 @@ class FoodServiceTest {
             assertEquals(expectedFoodDTO.price(), actualFoodDTO.price());
         }
 
+        @Test
+        @DisplayName("Deve lançar FoodNotFoundException quando não encontrar o ID.")
+        void shouldThrowFoodNotFoundException() {
+
+            Long nonExistentId = 1L;
+
+            when(foodRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+            FoodNotFoundException exception = assertThrows(FoodNotFoundException.class, () -> {
+                foodService.getFoodById(nonExistentId);
+            });
+
+            assertThrows(FoodNotFoundException.class, () -> {
+                foodService.getFoodById(nonExistentId);
+            });
+
+        }
     }
 
     @Nested
     class deleteFood {
         @Test
-        @DisplayName("Deve deletar um alimento pelo ID")
-        void shouldDeleteFoodById() {
+        @DisplayName("Deve deletar um alimento pelo ID.")
+        void shouldDeleteFoodByIdWithSuccess() {
             // Arrange
             Long foodId = 1L;
             Food existingFood = new Food(foodId, "Macarrão", "http://example.com/image.jpg", 30);
@@ -124,6 +178,24 @@ class FoodServiceTest {
 
             // Assert
             verify(foodRepository, times(1)).delete(existingFood);
+        }
+
+        @Test
+        @DisplayName("Deve lançar FoodNotFoundException quando não encontrar o ID.")
+        void shouldThrowFoodNotFoundException() {
+
+            Long nonExistentId = 1L;
+
+            when(foodRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+            FoodNotFoundException exception = assertThrows(FoodNotFoundException.class, () -> {
+                foodService.getFoodById(nonExistentId);
+            });
+
+            assertThrows(FoodNotFoundException.class, () -> {
+                foodService.deleteFood(nonExistentId);
+            });
+
         }
     }
 

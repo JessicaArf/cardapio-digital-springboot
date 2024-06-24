@@ -26,8 +26,8 @@ public class FoodController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FoodDTO>> getAll(){
-        List<FoodDTO> foodList = foodService.getAllFood();
+    public ResponseEntity<List<FoodDTO>> getAllFoods(){
+        List<FoodDTO> foodList = foodService.getAllFoods();
         return ResponseEntity.status(HttpStatus.OK).body(foodList);
     }
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +31,11 @@ public class FoodService {
         }
     }
 
-    public List<FoodDTO> getAllFood() {
-        List<Food> foodList = foodRepository.findAll();
-        return foodMapper.toDTOList(foodList);
+    public List<FoodDTO> getAllFoods() {
+        List<Food> foods = foodRepository.findAll();
+        return foods.stream()
+                .map(foodMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     public FoodDTO getFoodById(Long id) {
